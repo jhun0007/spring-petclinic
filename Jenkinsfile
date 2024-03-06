@@ -9,7 +9,7 @@ pipeline {
         AWS_CREDENTIAL_NAME = "AWSCredentials"
         REGION = "ap-northeast-2"
         DOCKER_IMAGE_NAME="aws07-spring-petclinic"
-        ECR_REPOSITORY = "257307634175.dkr.ecr.ap-northeast-2.amazonaws.com" #seoul 리전의 ecr주소
+        ECR_REPOSITORY = "257307634175.dkr.ecr.ap-northeast-2.amazonaws.com" 
         ECR_DOCKER_IMAGE = "${ECR_REPOSITORY}/${DOCKER_IMAGE_NAME}"
     }
     
