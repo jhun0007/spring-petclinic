@@ -1,6 +1,6 @@
 version: '3.9'
 services:
-  aws00-spring-petclinic:
+  aws06-spring-petclinic:
     image: ${IMAGE}:${TAG}
     container_name: spring-petclinic
     ports:
