@@ -69,7 +69,7 @@ pipeline {
                 }
             }
         }
-          /*
+       
         stage('Clean Up Docker Images on Jenkins Server') {
             steps {
                 echo 'Cleaning up unused Docker images on Jenkins server'
@@ -84,7 +84,7 @@ pipeline {
                 dir("${env.WORKSPACE}") {
                     sh 'zip -r deploy.zip ./deploy appspec.yml'
                     withAWS(region:"${REGION}", credentials:"${AWS_CREDENTIAL_NAME}"){
-                      s3Upload(file:"deploy.zip", bucket:"aws00-codedeploy-bucket")
+                      s3Upload(file:"deploy.zip", bucket:"aws07-codedeploy-bucket")
                     } 
                     sh 'rm -rf ./deploy.zip'                 
                 }        
@@ -111,6 +111,6 @@ pipeline {
                     sleep(10) // sleep 10s
             }
         }       
-*/
+
      }
  }
