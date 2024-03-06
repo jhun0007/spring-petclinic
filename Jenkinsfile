@@ -91,28 +91,28 @@ pipeline {
                 }        
             }
         }
-*/
+
         stage('Codedeploy Workload') {
             steps {
                echo "create Codedeploy group"   
                 sh '''
                     aws deploy create-deployment-group \
-                    --application-name aws00-code-deploy \
-                    --auto-scaling-groups aws00-asg \
-                    --deployment-group-name aws00-code-deploy-${BUILD_NUMBER} \
+                    --application-name aws06-code-deploy \
+                    --auto-scaling-groups aws06-asg \
+                    --deployment-group-name aws06-code-deploy-${BUILD_NUMBER} \
                     --deployment-config-name CodeDeployDefault.OneAtATime \
                     --service-role-arn arn:aws:iam::257307634175:role/aws00-codedeploy-service-role
                     '''
                 echo "Codedeploy Workload"   
                 sh '''
-                    aws deploy create-deployment --application-name aws00-code-deploy \
+                    aws deploy create-deployment --application-name aws06-code-deploy \
                     --deployment-config-name CodeDeployDefault.OneAtATime \
-                    --deployment-group-name aws00-code-deploy-${BUILD_NUMBER} \
-                    --s3-location bucket=aws00-codedeploy-bucket,bundleType=zip,key=deploy.zip
+                    --deployment-group-name aws06-code-deploy-${BUILD_NUMBER} \
+                    --s3-location bucket=aws06-codedeploy-bucket,bundleType=zip,key=deploy.zip
                     '''
                     sleep(10) // sleep 10s
             }
         } 
-*/      
+
     }
 }
