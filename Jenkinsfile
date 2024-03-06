@@ -70,47 +70,47 @@ pipeline {
             }
         }
        
-        stage('Clean Up Docker Images on Jenkins Server') {
-            steps {
-                echo 'Cleaning up unused Docker images on Jenkins server'
+        // stage('Clean Up Docker Images on Jenkins Server') {
+        //     steps {
+        //         echo 'Cleaning up unused Docker images on Jenkins server'
 
-                // Clean up unused Docker images, including those created within the last hour
-                sh "docker image prune -f --all --filter \"until=1h\""
-            }
-        }
-        stage('Upload to S3') {
-            steps {
-                echo "Upload to S3"
-                dir("${env.WORKSPACE}") {
-                    sh 'zip -r deploy.zip ./deploy appspec.yml'
-                    withAWS(region:"${REGION}", credentials:"${AWS_CREDENTIAL_NAME}"){
-                      s3Upload(file:"deploy.zip", bucket:"aws07-codedeploy-bucket")
-                    } 
-                    sh 'rm -rf ./deploy.zip'                 
-                }        
-            }
-        }
-        stage('Codedeploy Workload') {
-            steps {
-               echo "create Codedeploy group"   
-                sh '''
-                    aws deploy create-deployment-group \
-                    --application-name aws07-code-deploy \
-                    --auto-scaling-groups aws07-asg \
-                    --deployment-group-name aws07-code-deploy-${BUILD_NUMBER} \
-                    --deployment-config-name CodeDeployDefault.OneAtATime \
-                    --service-role-arn arn:aws:iam::257307634175:role/aws07-codedeploy-service-role
-                    '''
-                echo "Codedeploy Workload"   
-                sh '''
-                    aws deploy create-deployment --application-name aws07-code-deploy \
-                    --deployment-config-name CodeDeployDefault.OneAtATime \
-                    --deployment-group-name aws07-code-deploy-${BUILD_NUMBER} \
-                    --s3-location bucket=aws07-codedeploy-bucket,bundleType=zip,key=deploy.zip
-                    '''
-                    sleep(10) // sleep 10s
-            }
-        }       
+        //         // Clean up unused Docker images, including those created within the last hour
+        //         sh "docker image prune -f --all --filter \"until=1h\""
+        //     }
+        // }
+        // stage('Upload to S3') {
+        //     steps {
+        //         echo "Upload to S3"
+        //         dir("${env.WORKSPACE}") {
+        //             sh 'zip -r deploy.zip ./deploy appspec.yml'
+        //             withAWS(region:"${REGION}", credentials:"${AWS_CREDENTIAL_NAME}"){
+        //               s3Upload(file:"deploy.zip", bucket:"aws07-codedeploy-bucket")
+        //             } 
+        //             sh 'rm -rf ./deploy.zip'                 
+        //         }        
+        //     }
+        // }
+        // stage('Codedeploy Workload') {
+        //     steps {
+        //        echo "create Codedeploy group"   
+        //         sh '''
+        //             aws deploy create-deployment-group \
+        //             --application-name aws07-code-deploy \
+        //             --auto-scaling-groups aws07-asg \
+        //             --deployment-group-name aws07-code-deploy-${BUILD_NUMBER} \
+        //             --deployment-config-name CodeDeployDefault.OneAtATime \
+        //             --service-role-arn arn:aws:iam::257307634175:role/aws07-codedeploy-service-role
+        //             '''
+        //         echo "Codedeploy Workload"   
+        //         sh '''
+        //             aws deploy create-deployment --application-name aws07-code-deploy \
+        //             --deployment-config-name CodeDeployDefault.OneAtATime \
+        //             --deployment-group-name aws07-code-deploy-${BUILD_NUMBER} \
+        //             --s3-location bucket=aws07-codedeploy-bucket,bundleType=zip,key=deploy.zip
+        //             '''
+        //             sleep(10) // sleep 10s
+        //     }
+        // }       
 
      }
  }
