@@ -9,7 +9,7 @@ pipeline {
         AWS_CREDENTIAL_NAME = "AWSCredentials"
         REGION = "ap-northeast-2"
         DOCKER_IMAGE_NAME="aws06-spring-petclinic"
-        ECR_REPOSITORY = "257307634175.dkr.ecr.ap-northeast-2.amazonaws.com"
+        ECR_REPOSITORY = "257307634175.dkr.ecr.ap-northeast-2.amazonaws.com/aws06-ecr"
         ECR_DOCKER_IMAGE = "${ECR_REPOSITORY}/${DOCKER_IMAGE_NAME}"
     }
     
@@ -79,40 +79,40 @@ pipeline {
                 sh "docker image prune -f --all --filter \"until=1h\""
             }
         }
-        stage('Upload to S3') {
-            steps {
-                echo "Upload to S3"
-                dir("${env.WORKSPACE}") {
-                    sh 'zip -r deploy.zip ./deploy appspec.yml'
-                    withAWS(region:"${REGION}", credentials:"${AWS_CREDENTIAL_NAME}"){
-                      s3Upload(file:"deploy.zip", bucket:"aws06-codedeploy-bucket")
-                    } 
-                    sh 'rm -rf ./deploy.zip'                 
-                }        
-            }
-        }
+        // stage('Upload to S3') {
+        //     steps {
+        //         echo "Upload to S3"
+        //         dir("${env.WORKSPACE}") {
+        //             sh 'zip -r deploy.zip ./deploy appspec.yml'
+        //             withAWS(region:"${REGION}", credentials:"${AWS_CREDENTIAL_NAME}"){
+        //               s3Upload(file:"deploy.zip", bucket:"aws06-codedeploy-bucket")
+        //             } 
+        //             sh 'rm -rf ./deploy.zip'                 
+        //         }        
+        //     }
+        // }
 
-        stage('Codedeploy Workload') {
-            steps {
-               echo "create Codedeploy group"   
-                sh '''
-                    aws deploy create-deployment-group \
-                    --application-name aws06-code-deploy \
-                    --auto-scaling-groups aws06-asg \
-                    --deployment-group-name aws06-code-deploy-${BUILD_NUMBER} \
-                    --deployment-config-name CodeDeployDefault.OneAtATime \
-                    --service-role-arn arn:aws:iam::257307634175:role/aws06-codedeploy-service-role
-                    '''
-                echo "Codedeploy Workload"   
-                sh '''
-                    aws deploy create-deployment --application-name aws06-code-deploy \
-                    --deployment-config-name CodeDeployDefault.OneAtATime \
-                    --deployment-group-name aws06-code-deploy-${BUILD_NUMBER} \
-                    --s3-location bucket=aws06-codedeploy-bucket,bundleType=zip,key=deploy.zip
-                    '''
-                    sleep(10) // sleep 10s
-            }
-        } 
+        // stage('Codedeploy Workload') {
+        //     steps {
+        //        echo "create Codedeploy group"   
+        //         sh '''
+        //             aws deploy create-deployment-group \
+        //             --application-name aws06-code-deploy \
+        //             --auto-scaling-groups aws06-asg \
+        //             --deployment-group-name aws06-code-deploy-${BUILD_NUMBER} \
+        //             --deployment-config-name CodeDeployDefault.OneAtATime \
+        //             --service-role-arn arn:aws:iam::257307634175:role/aws06-codedeploy-service-role
+        //             '''
+        //         echo "Codedeploy Workload"   
+        //         sh '''
+        //             aws deploy create-deployment --application-name aws06-code-deploy \
+        //             --deployment-config-name CodeDeployDefault.OneAtATime \
+        //             --deployment-group-name aws06-code-deploy-${BUILD_NUMBER} \
+        //             --s3-location bucket=aws06-codedeploy-bucket,bundleType=zip,key=deploy.zip
+        //             '''
+        //             sleep(10) // sleep 10s
+        //     }
+        // } 
 
     }
 }
