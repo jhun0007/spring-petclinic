@@ -42,8 +42,10 @@ pipeline {
         stage ('Docker Build') {
             steps {
                 dir("${env.WORKSPACE}") {
+                    echo 'Starting Docker build...'
                     sh """
                       docker build -t $ECR_DOCKER_IMAGE:$BUILD_NUMBER .
+                      echo "Tagging Docker image..."
                       docker tag $ECR_DOCKER_IMAGE:$BUILD_NUMBER $ECR_DOCKER_IMAGE:latest
                     """
                 }
