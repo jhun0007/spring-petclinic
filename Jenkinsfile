@@ -79,9 +79,9 @@ pipeline {
                 sh "docker image prune -f --all --filter \"until=1h\""
             }
         }
-       stage('helm deployment') {
-            step{ sh "--install mychart --namespace helm-deployment --set image.tag=$BUILD_NUMBER" }
-       }        
+       // stage('helm deployment') {
+       //      step{ sh "--install mychart --namespace helm-deployment --set image.tag=$BUILD_NUMBER" }
+       // }        
     }
 }
 
