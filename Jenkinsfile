@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent admin
 
     tools {
         jdk "jdk17"
@@ -18,7 +18,8 @@ pipeline {
             steps {
                 echo 'Git Clone'
                 git url: 'https://github.com/baxk1503/spring-petclinic.git',
-                branch: 'wavefront', credentialsId: 'github_accept'
+                branch: 'wavefront', credentialsId: 'github_accept_token
+            '
             }
             post {
                 success {
