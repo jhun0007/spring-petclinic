@@ -2,39 +2,36 @@ pipeline {
     agent any
 
     tools {
-        maven "M3"
         jdk "jdk17"
+        maven "M3"
     }
-        environment{
+    environment {
         REGION = 'ap-northeast-2'
-        // EKS_API = 'https://7C268FBA8DA31ABE9CFA3E3B3C1DC7D2.gr7.ap-northeast-2.eks.amazonaws.com'
-        // EKS_CLUSTER_NAME = "aws12-eks-work-cluster"
-        // EKS_JENKINS_CREDENTIAL_ID = 'kubectl-deploy-credential'
+        AWS_CREDENTIAL_NAME = 'AWSCredentials'
+        DOCKER_IMAGE_NAME= 'project02-spring-petclinic'
         ECR_PATH = '257307634175.dkr.ecr.ap-northeast-2.amazonaws.com'
-        ECR_IMAGE = 'project02-spring-petclinic'
-        AWS_CREDENTIAL_ID = 'AWSCredentials'
-        ECR_DOCKER_IMAGE = "${ECR_PATH}/${ECR_IMAGE}"   
+        ECR_DOCKER_IMAGE = "${ECR_PATH}/${DOCKER_IMAGE_NAME}"   
     }
     
     stages {
-         stage('Git Clone') {
-             steps {
-                 echo 'Git Clone'
-                 git url: 'https://github.com/baxk1503/spring-petclinic.git',
-                 branch: 'wavefront', credentialsId: 'github_access_token'
-             }
-             post {
-                 success {
-                     echo 'success clone project'
-                 }
-                 failure {
-                     error 'fail clone project' // exit pipeline
-                 }
-             }
-         }
-        
-         stage ('mvn Build') {
-             steps {
+        stage('Git Clone') {
+            steps {
+                echo 'Git Clone'
+                git url: 'https://github.com/baxk1503/spring-petclinic.git',
+                branch: 'wavefront', credentialsId: 'github_access_token'
+    
+            }
+            post {
+                success {
+                    echo 'success clone project'
+                }
+                failure {
+                    error 'fail clone project' // exit pipeline
+                }
+            }
+        }        
+        stage ('mvn Build') {
+            steps {
                 sh 'mvn -Dmaven.test.failure.ignore=true install' 
             }
             post {
@@ -42,25 +39,26 @@ pipeline {
                     junit '**/target/surefire-reports/TEST-*.xml' 
                 }
             }
-         }
-
-         stage ('Docker Build') {
+        }        
+        stage ('Docker Build') {
             steps {
                 dir("${env.WORKSPACE}") {
+                    echo 'Starting Docker build...'
                     sh """
                       docker build -t $ECR_DOCKER_IMAGE:$BUILD_NUMBER .
+                      echo "Tagging Docker image..."
                       docker tag $ECR_DOCKER_IMAGE:$BUILD_NUMBER $ECR_DOCKER_IMAGE:latest
                     """
                 }
             }
-        }
+        }       
         stage('Push Docker Image') {
             steps {
                 echo "Push Docker Image to ECR"
                 script{
                     // cleanup current user docker credentials
                     sh 'rm -f ~/.dockercfg ~/.docker/config.json || true' 
-                    docker.withRegistry("https://${ECR_PATH}" , "ecr:${REGION}:${AWS_CREDENTIAL_ID}" ) {
+                    docker.withRegistry("https://${ECR_PATH}", "ecr:${REGION}:${AWS_CREDENTIAL_NAME}") {
                         docker.image("${ECR_DOCKER_IMAGE}:${BUILD_NUMBER}").push()
                         docker.image("${ECR_DOCKER_IMAGE}:latest").push()
                     }
@@ -82,17 +80,8 @@ pipeline {
                 sh "docker image prune -f --all --filter \"until=1h\""
             }
         }
-
-        // stage('Deploy to k8s') {
-        //     steps {
-        //         withKubeConfig([credentialsId: "kubectl-deploy-credential",
-        //                         serverUrl: "${EKS_API}",
-        //                         clusterName: "${EKS_CLUSTER_NAME}"]){
-        //             sh "sed 's/IMAGE_VERSION/v${env.BUILD_ID}/g' service.yaml > output.yaml"
-        //             sh "aws eks --region ${REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME}"
-        //             sh "kubectl apply -f output.yaml"
-        //             sh "rm output.yaml"
-        //             }
-        //         }    
-        }
-  }       
+       // stage('helm deployment') {
+       //      step{ sh "--install mychart --namespace helm-deployment --set image.tag=$BUILD_NUMBER" }
+       // }        
+    }
+}
