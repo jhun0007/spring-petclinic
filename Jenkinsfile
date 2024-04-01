@@ -6,9 +6,9 @@ pipeline {
         maven "M3"
     }
     environment {
-        AWS_CREDENTIAL_NAME = "AWSCredentials"
-        REGION = "ap-northeast-2"
-        DOCKER_IMAGE_NAME="project02-spring-petclinic"
+        REGION = 'ap-northeast-2'
+        AWS_CREDENTIAL_NAME = 'AWSCredentials'
+        DOCKER_IMAGE_NAME= 'project02-spring-petclinic'
         ECR_PATH = '257307634175.dkr.ecr.ap-northeast-2.amazonaws.com'
         ECR_DOCKER_IMAGE = "${ECR_PATH}/${DOCKER_IMAGE_NAME}"   
     }
