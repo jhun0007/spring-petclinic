@@ -85,7 +85,7 @@ pipeline {
         }
         stage('Deploy to eks') {
             steps {
-                withKubeConfig([credentialsId: 'kubectl-deploy-credentials',
+                withKubeConfig([credentialsId: 'kubectl-deploy-credential',
                     serverUrl: "${EKS_API}",
                     clusterName: "${EKS_CLUSTER_NAME}"]){
                         sh "sed 's/IMAGE_VERSION/latest/g' service.yaml > output.yaml"
