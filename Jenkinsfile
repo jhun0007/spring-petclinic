@@ -45,8 +45,7 @@ pipeline {
                 dir("${env.WORKSPACE}") {
                     echo 'Starting Docker build...'
                     sh """
-                      docker build -t $ECR_DOCKER_IMAGE:$BUILD_NUMBER .
-                      echo "Tagging Docker image..."
+                     docker build -t $ECR_DOCKER_IMAGE:$BUILD_NUMBER .
                       docker tag $ECR_DOCKER_IMAGE:$BUILD_NUMBER $ECR_DOCKER_IMAGE:latest
                     """
                 }
@@ -59,7 +58,7 @@ pipeline {
                     // cleanup current user docker credentials
                     sh 'rm -f ~/.dockercfg ~/.docker/config.json || true' 
                     docker.withRegistry("https://${ECR_PATH}", "ecr:${REGION}:${AWS_CREDENTIAL_NAME}") {
-                        // docker.image("${ECR_DOCKER_IMAGE}:${BUILD_NUMBER}").push()
+                        docker.image("${ECR_DOCKER_IMAGE}:${BUILD_NUMBER}").push()
                         docker.image("${ECR_DOCKER_IMAGE}:latest").push()
                     }
                     
@@ -80,8 +79,15 @@ pipeline {
                 sh "docker image prune -f --all --filter \"until=1h\""
             }
         }
-       // stage('helm deployment') {
-       //      step{ sh "--install mychart --namespace helm-deployment --set image.tag=$BUILD_NUMBER" }
-       // }        
-    }
-}
+        stage('Deploy to eks') {
+            steps {
+                withKubeConfig([credentialsId: 'kubectl-deploy-credentials',
+                    serverUrl: "${EKS_API}",
+                    clusterName: "${EKS_CLUSTER_NAME}"]){
+                        sh "sed 's/IMAGE_VERSION/latest/g' service.yaml > output.yaml"
+                        // sh "aws eks --region ${REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME}"
+                        sh "kubectl apply -f output.yaml"
+                        sh "rm -f output.yaml"
+                            }
+            }            
+        }
