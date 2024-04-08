@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: spring-petclinic
-        image: 257307634175.dkr.ecr.ap-northeast-2.amazonaws.com/project02-ecr:latest
+        image: 257307634175.dkr.ecr.ap-northeast-2.amazonaws.com/project02-ecr:IMAGE_VERSION
         ports:
         - containerPort: 8080
 
