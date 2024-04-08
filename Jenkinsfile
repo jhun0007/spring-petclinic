@@ -11,7 +11,7 @@ pipeline {
         DOCKER_IMAGE_NAME= 'project02-ecr'
         ECR_PATH = '257307634175.dkr.ecr.ap-northeast-2.amazonaws.com'
         ECR_DOCKER_IMAGE = "${ECR_PATH}/${DOCKER_IMAGE_NAME}"
-        EKS_API = 'https://FD9DEE3966F529DE38A0FA90811AFDCC.gr7.ap-northeast-2.eks.amazonaws.com'
+        EKS_API = 'https://279A742B97B337C4E9665867CC8A7911.gr7.ap-northeast-2.eks.amazonaws.com'
         EKS_CLUSTER_NAME = "project02-eks-cluster"
         EKS_JENKINS_CREDENTIAL_ID = 'kubectl-deploy-credential'
         
